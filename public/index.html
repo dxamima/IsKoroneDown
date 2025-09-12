@@ -49,6 +49,25 @@
     button:hover {
       background: #e53b3b;
     }
+    footer {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+    }
+    .source-link {
+      color: white;
+      text-decoration: none;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      transition: background 0.3s;
+      text-shadow: -1px -1px 0 #000, 1px -1px 0 #000,
+                   -1px 1px 0 #000, 1px 1px 0 #000;
+    }
+    .source-link:hover {
+      background: rgba(0, 0, 0, 0.9);
+    }
   </style>
 </head>
 <body>
@@ -61,6 +80,11 @@
     <p id="report-count"></p>
     <button onclick="sendReport()">Report an Issue</button>
   </div>
+  
+  <footer>
+    <a href="#" class="source-link" id="sourceLink">View Source Code</a>
+  </footer>
+  
   <script>
     async function loadStatus() {
       const res = await fetch("/status");
@@ -78,6 +102,12 @@
       loadStatus();
     }
     loadStatus();
+    
+    // Set up source code link - you can edit this URL later
+    document.getElementById('sourceLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      window.open('https://codeberg.org/mrmeowcat/IsKoroneDown', '_blank');
+    });
   </script>
 </body>
 </html>

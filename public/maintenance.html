@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Korone Uptime - Maintenance</title>
+  <style>
+    @font-face {
+      font-family: 'BobloxClassic';
+      src: url('/BobloxClassic-nRjl4.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    body {
+      margin: 0;
+      font-family: 'BobloxClassic', Arial, sans-serif;
+      background: url('/Background.png') no-repeat center center fixed;
+      background-size: cover;
+      text-align: center;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 40px;
+      border-radius: 15px;
+      max-width: 600px;
+      margin: 20px;
+    }
+    img {
+      width: 150px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin: 20px 0;
+      text-shadow: -3px -3px 0 #000, 3px -3px 0 #000,
+                   -3px 3px 0 #000, 3px 3px 0 #000;
+      color: #ff6b35;
+    }
+    p {
+      font-size: 1.2em;
+      margin: 15px 0;
+      line-height: 1.5;
+    }
+    .maintenance-icon {
+      font-size: 4em;
+      margin: 20px 0;
+      color: #ffa500;
+    }
+    .back-soon {
+      font-size: 1.1em;
+      color: #ffd700;
+      margin-top: 20px;
+    }
+    .source-link {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      color: white;
+      text-decoration: none;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      transition: background 0.3s;
+      text-shadow: -1px -1px 0 #000, 1px -1px 0 #000,
+                   -1px 1px 0 #000, 1px 1px 0 #000;
+    }
+    .source-link:hover {
+      background: rgba(0, 0, 0, 0.9);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="/Korone.png" alt="Korone" />
+    <div class="maintenance-icon">🔧</div>
+    <h1>Maintenance in Progress</h1>
+    <p>The Korone Down Detector is currently undergoing maintenance.</p>
+    <p>We're working hard to improve your experience!</p>
+    <p class="back-soon">We'll be back soon. Thank you for your patience!</p>
+  </div>
+  
+  <a href="#" class="source-link" onclick="window.open('https://codeberg.org/mrmeowcat/IsKoroneDown', '_blank'); return false;">View Source Code</a>
+</body>
+</html>

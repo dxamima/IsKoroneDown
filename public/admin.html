@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Korone Down Detector - Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .login-form {
+      max-width: 300px;
+      margin: 100px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .admin-panel {
+      display: none;
+    }
+    
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h2 {
+      color: #666;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+    }
+    
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 5px;
+    }
+    
+    input, select, textarea, button {
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    button {
+      background: #007cba;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    
+    button:hover {
+      background: #005a87;
+    }
+    
+    .danger-btn {
+      background: #dc3545;
+    }
+    
+    .danger-btn:hover {
+      background: #c82333;
+    }
+    
+    .success-btn {
+      background: #28a745;
+    }
+    
+    .success-btn:hover {
+      background: #218838;
+    }
+    
+    .ip-list {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .ip-item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .ip-item:last-child {
+      border-bottom: none;
+    }
+    
+    .status-indicator {
+      padding: 5px 10px;
+      border-radius: 20px;
+      color: white;
+      font-weight: bold;
+    }
+    
+    .status-up { background: #28a745; }
+    .status-down { background: #dc3545; }
+    .status-auto { background: #6c757d; }
+    .status-maintenance { background: #fd7e14; }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .logout-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    
+    .error {
+      color: #dc3545;
+      margin: 10px 0;
+    }
+    
+    .success {
+      color: #28a745;
+      margin: 10px 0;
+    }
+    
+    .source-link {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      color: #007cba;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      transition: background 0.3s;
+      border: 1px solid #ddd;
+    }
+    
+    .source-link:hover {
+      background: white;
+      color: #005a87;
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Form -->
+  <div id="loginForm" class="login-form">
+    <h1>Admin Login</h1>
+    <div id="loginError" class="error"></div>
+    <form id="login">
+      <div>
+        <input type="text" id="username" placeholder="Username" required>
+      </div>
+      <div>
+        <input type="password" id="password" placeholder="Password" required>
+      </div>
+      <div>
+        <button type="submit">Login</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="adminPanel" class="admin-panel">
+    <div class="container">
+      <button id="logoutBtn" class="logout-btn danger-btn">Logout</button>
+      
+      <h1>Korone Down Detector - Admin Panel</h1>
+      
+      <!-- Status Control -->
+      <div class="section">
+        <h2>System Status Control</h2>
+        <div class="controls">
+          <span>Current Status:</span>
+          <span id="currentStatus" class="status-indicator">Loading...</span>
+          <select id="statusSelect">
+            <option value="auto">Auto (Based on Reports)</option>
+            <option value="up">Force UP</option>
+            <option value="down">Force DOWN</option>
+          </select>
+          <button id="updateStatus" class="success-btn">Update Status</button>
+        </div>
+      </div>
+
+      <!-- Maintenance Mode -->
+      <div class="section">
+        <h2>Maintenance Mode</h2>
+        <div class="controls">
+          <span>Maintenance Mode:</span>
+          <span id="maintenanceStatus" class="status-indicator">Loading...</span>
+          <button id="toggleMaintenance" class="danger-btn">Toggle Maintenance</button>
+        </div>
+      </div>
+
+      <!-- Reporting IPs -->
+      <div class="section">
+        <h2>Recent Reporting IPs (Last 24 Hours)</h2>
+        <div id="reportingIPs" class="ip-list">
+          Loading...
+        </div>
+      </div>
+
+      <!-- IP Blacklist Management -->
+      <div class="section">
+        <h2>IP Blacklist Management</h2>
+        <div class="controls">
+          <input type="text" id="newBlacklistIP" placeholder="IP Address">
+          <input type="text" id="blacklistReason" placeholder="Reason (optional)">
+          <button id="addBlacklist" class="danger-btn">Blacklist IP</button>
+        </div>
+        <div id="blacklistedIPs" class="ip-list">
+          Loading...
+        </div>
+      </div>
+      
+      <div id="messages"></div>
+    </div>
+    
+    <a href="#" class="source-link" id="sourceLink">View Source Code</a>
+  </div>
+
+  <script>
+    let isLoggedIn = false;
+    
+    // DOM Elements
+    const loginForm = document.getElementById('loginForm');
+    const adminPanel = document.getElementById('adminPanel');
+    const loginError = document.getElementById('loginError');
+    const messages = document.getElementById('messages');
+    
+    // Login handling
+    document.getElementById('login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      try {
+        const response = await fetch('/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          isLoggedIn = true;
+          loginForm.style.display = 'none';
+          adminPanel.style.display = 'block';
+          loadDashboard();
+        } else {
+          loginError.textContent = data.error;
+        }
+      } catch (error) {
+        loginError.textContent = 'Login failed';
+      }
+    });
+    
+    // Logout handling
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/admin/logout', { method: 'POST' });
+      isLoggedIn = false;
+      loginForm.style.display = 'block';
+      adminPanel.style.display = 'none';
+      loginError.textContent = '';
+    });
+    
+    // Load dashboard data
+    async function loadDashboard() {
+      if (!isLoggedIn) return;
+      
+      try {
+        const response = await fetch('/admin/dashboard');
+        if (!response.ok) {
+          if (response.status === 401) {
+            isLoggedIn = false;
+            loginForm.style.display = 'block';
+            adminPanel.style.display = 'none';
+            return;
+          }
+          throw new Error('Failed to load dashboard');
+        }
+        
+        const data = await response.json();
+        
+        // Update status display
+        const statusSelect = document.getElementById('statusSelect');
+        statusSelect.value = data.settings.force_status;
+        
+        const currentStatus = document.getElementById('currentStatus');
+        currentStatus.textContent = data.settings.force_status.toUpperCase();
+        currentStatus.className = `status-indicator status-${data.settings.force_status}`;
+        
+        // Update maintenance mode display
+        const maintenanceStatus = document.getElementById('maintenanceStatus');
+        const isMaintenanceOn = data.settings.maintenance_mode === 'true';
+        maintenanceStatus.textContent = isMaintenanceOn ? 'ON' : 'OFF';
+        maintenanceStatus.className = `status-indicator ${isMaintenanceOn ? 'status-maintenance' : 'status-up'}`;
+        
+        // Update reporting IPs
+        const reportingIPs = document.getElementById('reportingIPs');
+        if (data.reports.length === 0) {
+          reportingIPs.innerHTML = '<div class="ip-item">No reports in the last 24 hours</div>';
+        } else {
+          reportingIPs.innerHTML = data.reports.map(report => `
+            <div class="ip-item">
+              <div>
+                <strong>${report.ip}</strong> - ${report.count} reports
+                <br><small>Last: ${new Date(report.last_report).toLocaleString()}</small>
+              </div>
+              <button onclick="blacklistIP('${report.ip}')" class="danger-btn">Blacklist</button>
+            </div>
+          `).join('');
+        }
+        
+        // Update blacklisted IPs
+        const blacklistedIPs = document.getElementById('blacklistedIPs');
+        if (data.blacklistedIPs.length === 0) {
+          blacklistedIPs.innerHTML = '<div class="ip-item">No blacklisted IPs</div>';
+        } else {
+          blacklistedIPs.innerHTML = data.blacklistedIPs.map(ip => `
+            <div class="ip-item">
+              <div>
+                <strong>${ip.ip}</strong>
+                <br><small>Reason: ${ip.reason}</small>
+                <br><small>Added: ${new Date(ip.timestamp).toLocaleString()}</small>
+              </div>
+              <button onclick="removeBlacklist('${ip.ip}')" class="success-btn">Remove</button>
+            </div>
+          `).join('');
+        }
+        
+      } catch (error) {
+        showMessage('Error loading dashboard: ' + error.message, 'error');
+      }
+    }
+    
+    // Status control
+    document.getElementById('updateStatus').addEventListener('click', async () => {
+      const status = document.getElementById('statusSelect').value;
+      
+      try {
+        const response = await fetch('/admin/set-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        
+        if (response.ok) {
+          showMessage('Status updated successfully', 'success');
+          loadDashboard();
+        } else {
+          const data = await response.json();
+          showMessage('Error: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showMessage('Error updating status', 'error');
+      }
+    });
+    
+    // Maintenance mode toggle
+    document.getElementById('toggleMaintenance').addEventListener('click', async () => {
+      const currentStatus = document.getElementById('maintenanceStatus').textContent;
+      const enabled = currentStatus === 'OFF';
+      
+      try {
+        const response = await fetch('/admin/maintenance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled })
+        });
+        
+        if (response.ok) {
+          showMessage(`Maintenance mode ${enabled ? 'enabled' : 'disabled'}`, 'success');
+          loadDashboard();
+        } else {
+          const data = await response.json();
+          showMessage('Error: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showMessage('Error toggling maintenance mode', 'error');
+      }
+    });
+    
+    // Add IP to blacklist
+    document.getElementById('addBlacklist').addEventListener('click', async () => {
+      const ip = document.getElementById('newBlacklistIP').value.trim();
+      const reason = document.getElementById('blacklistReason').value.trim();
+      
+      if (!ip) {
+        showMessage('Please enter an IP address', 'error');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/admin/blacklist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip, reason })
+        });
+        
+        if (response.ok) {
+          showMessage('IP blacklisted successfully', 'success');
+          document.getElementById('newBlacklistIP').value = '';
+          document.getElementById('blacklistReason').value = '';
+          loadDashboard();
+        } else {
+          const data = await response.json();
+          showMessage('Error: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showMessage('Error blacklisting IP', 'error');
+      }
+    });
+    
+    // Blacklist IP from reporting list
+    async function blacklistIP(ip) {
+      try {
+        const response = await fetch('/admin/blacklist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip, reason: 'Blacklisted from admin panel' })
+        });
+        
+        if (response.ok) {
+          showMessage('IP blacklisted successfully', 'success');
+          loadDashboard();
+        } else {
+          const data = await response.json();
+          showMessage('Error: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showMessage('Error blacklisting IP', 'error');
+      }
+    }
+    
+    // Remove IP from blacklist
+    async function removeBlacklist(ip) {
+      try {
+        const response = await fetch(`/admin/blacklist/${encodeURIComponent(ip)}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          showMessage('IP removed from blacklist', 'success');
+          loadDashboard();
+        } else {
+          const data = await response.json();
+          showMessage('Error: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showMessage('Error removing IP from blacklist', 'error');
+      }
+    }
+    
+    // Show messages
+    function showMessage(message, type) {
+      const messageDiv = document.createElement('div');
+      messageDiv.textContent = message;
+      messageDiv.className = type;
+      messages.appendChild(messageDiv);
+      
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 5000);
+    }
+    
+    // Auto-refresh dashboard every 30 seconds
+    setInterval(() => {
+      if (isLoggedIn) {
+        loadDashboard();
+      }
+    }, 30000);
+    
+    // Set up source code link - you can edit this URL later
+    document.getElementById('sourceLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      window.open('https://codeberg.org/your-username/korone-down-detector', '_blank');
+    });
+  </script>
+</body>
+</html>

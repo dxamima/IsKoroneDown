@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Korone Uptime</title>
+  <style>
+    @font-face {
+      font-family: 'BobloxClassic';
+      src: url('/BobloxClassic-nRjl4.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    body {
+      margin: 0;
+      font-family: 'BobloxClassic', Arial, sans-serif;
+      background: url('/Background.png') no-repeat center center fixed;
+      background-size: cover;
+      text-align: center;
+      color: white;
+    }
+    header img {
+      margin-top: 30px;
+      width: 200px;
+    }
+    h1 {
+      font-size: 3em;
+      margin: 10px 0;
+      text-shadow: -3px -3px 0 #000, 3px -3px 0 #000,
+                   -3px 3px 0 #000, 3px 3px 0 #000;
+    }
+    .status {
+      margin-top: 40px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      display: inline-block;
+      border-radius: 10px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 5px;
+      background: #ff4747;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #e53b3b;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="/Korone.png" alt="Korone logo" />
+    <h1>Korone Uptime</h1>
+  </header>
+  <div class="status">
+    <h2 id="uptime-status">Loading status...</h2>
+    <p id="report-count"></p>
+    <button onclick="sendReport()">Report an Issue</button>
+  </div>
+  <script>
+    async function loadStatus() {
+      const res = await fetch("/status");
+      const data = await res.json();
+      document.getElementById("uptime-status").innerText = data.status;
+      document.getElementById("report-count").innerText =
+        `Reports in last 24h: ${data.count}`;
+    }
+    async function sendReport() {
+      const res = await fetch("/report", { method: "POST" });
+      if (res.status === 429) {
+        alert("You can only report once every 24 hours.");
+        return;
+      }
+      loadStatus();
+    }
+    loadStatus();
+  </script>
+</body>
+</html>

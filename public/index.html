@@ -68,8 +68,19 @@
     .source-link:hover {
       background: rgba(0, 0, 0, 0.9);
     }
-    
-    /* Modal Styles */
+    .credits {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 0.9em;
+      background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0));
+      text-shadow: -1px -1px 0 #000, 1px -1px 0 #000,
+                   -1px 1px 0 #000, 1px 1px 0 #000;
+      pointer-events: none;
+    }
     .modal-overlay {
       display: none;
       position: fixed;
@@ -81,7 +92,6 @@
       z-index: 1000;
       backdrop-filter: blur(5px);
     }
-    
     .modal {
       position: fixed;
       top: 50%;
@@ -98,14 +108,12 @@
       color: white;
       text-align: center;
     }
-    
     .modal-icon {
       font-size: 3em;
       margin-bottom: 15px;
       color: #ff6b35;
       text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
     }
-    
     .modal-title {
       font-size: 1.8em;
       color: #ff6b35;
@@ -113,7 +121,6 @@
       text-shadow: -2px -2px 0 #000, 2px -2px 0 #000,
                    -2px 2px 0 #000, 2px 2px 0 #000;
     }
-    
     .modal-text {
       font-size: 1.1em;
       line-height: 1.5;
@@ -121,13 +128,11 @@
       text-shadow: -1px -1px 0 #000, 1px -1px 0 #000,
                    -1px 1px 0 #000, 1px 1px 0 #000;
     }
-    
     .modal-buttons {
       display: flex;
       gap: 15px;
       justify-content: center;
     }
-    
     .modal-btn {
       padding: 12px 25px;
       font-size: 1.1em;
@@ -140,25 +145,21 @@
       text-shadow: -1px -1px 0 #000, 1px -1px 0 #000,
                    -1px 1px 0 #000, 1px 1px 0 #000;
     }
-    
     .modal-btn-confirm {
       background: #ff4747;
       color: white;
       border: 2px solid #ff6b35;
     }
-    
     .modal-btn-confirm:hover {
       background: #e53b3b;
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(255, 71, 71, 0.4);
     }
-    
     .modal-btn-cancel {
       background: #666;
       color: white;
       border: 2px solid #888;
     }
-    
     .modal-btn-cancel:hover {
       background: #555;
       transform: translateY(-2px);
@@ -176,11 +177,15 @@
     <p id="report-count"></p>
     <button onclick="sendReport()">Report an Issue</button>
   </div>
-  
+
   <footer>
     <a href="#" class="source-link" id="sourceLink">View Source Code</a>
   </footer>
-  
+
+  <div class="credits">
+    Made with &lt;3 by mrmeowcat and 97yg on Discord
+  </div>
+
   <!-- Confirmation Modal -->
   <div id="modalOverlay" class="modal-overlay">
     <div class="modal">
@@ -197,7 +202,7 @@
       </div>
     </div>
   </div>
-  
+
   <script>
     async function loadStatus() {
       const res = await fetch("/status");
@@ -207,44 +212,35 @@
         `Reports in last 24h: ${data.count}`;
     }
     async function sendReport() {
-      // Show custom modal instead of browser alert
       showModal();
     }
-    
     function showModal() {
       document.getElementById('modalOverlay').style.display = 'block';
-      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+      document.body.style.overflow = 'hidden';
     }
-    
     function closeModal() {
       document.getElementById('modalOverlay').style.display = 'none';
-      document.body.style.overflow = 'auto'; // Restore scrolling
+      document.body.style.overflow = 'auto';
     }
-    
     async function confirmReport() {
       closeModal();
-      
       try {
         const res = await fetch("/report", { method: "POST" });
         if (res.status === 429) {
           showNotification("You can only report once every 24 hours.", "warning");
           return;
         }
-        
         if (res.ok) {
           showNotification("Thank you for your report! It has been recorded.", "success");
         } else {
           showNotification("There was an error submitting your report. Please try again.", "error");
         }
-        
         loadStatus();
       } catch (error) {
         showNotification("Network error. Please check your connection and try again.", "error");
       }
     }
-    
     function showNotification(message, type) {
-      // Create a simple notification
       const notification = document.createElement('div');
       notification.style.cssText = `
         position: fixed;
@@ -264,29 +260,21 @@
       `;
       notification.textContent = message;
       document.body.appendChild(notification);
-      
-      // Remove notification after 4 seconds
       setTimeout(() => {
         notification.remove();
       }, 4000);
     }
-    
-    // Close modal when clicking outside of it
     document.getElementById('modalOverlay').addEventListener('click', function(e) {
       if (e.target === this) {
         closeModal();
       }
     });
-    
-    // Close modal with Escape key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         closeModal();
       }
     });
     loadStatus();
-    
-    // Set up source code link - you can edit this URL later
     document.getElementById('sourceLink').addEventListener('click', function(e) {
       e.preventDefault();
       window.open('https://codeberg.org/mrmeowcat/IsKoroneDown', '_blank');
